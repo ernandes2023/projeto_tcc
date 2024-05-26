@@ -1,0 +1,146 @@
+CREATE DATABASE inventory2;
+USE inventory;
+
+CREATE TABLE `produto` (
+  `id_produto` int NOT NULL AUTO_INCREMENT,
+  `cod_produto` varchar(4) DEFAULT NULL,
+  `nome_produto` varchar(55) DEFAULT NULL,
+  `serial_produto` varchar(55) DEFAULT NULL,
+  PRIMARY KEY (`id_produto`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `cliente` (
+  `id_cliente` int NOT NULL AUTO_INCREMENT,
+  `nome_cliente` varchar(55) DEFAULT NULL,
+  `cnpj` varchar(14) DEFAULT NULL,
+  `telefone_cliente` varchar(11) DEFAULT NULL,
+  `email_cliente` varchar(55) DEFAULT NULL,
+  PRIMARY KEY (`id_cliente`),
+  UNIQUE KEY `cnpj` (`cnpj`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `cli_prod` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `id_cli` int DEFAULT NULL,
+  `id_prod` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `id_cli` (`id_cli`),
+  KEY `id_prod` (`id_prod`),
+  CONSTRAINT `cli_prod_ibfk_1` FOREIGN KEY (`id_cli`) REFERENCES `cliente` (`id_cliente`),
+  CONSTRAINT `cli_prod_ibfk_2` FOREIGN KEY (`id_prod`) REFERENCES `produto` (`id_produto`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `componente` (
+  `id_componente` int NOT NULL AUTO_INCREMENT,
+  `nome_comp` varchar(55) DEFAULT NULL,
+  `valor_comp` varchar(55) DEFAULT NULL,
+  PRIMARY KEY (`id_componente`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `defeito` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `nome_defeito` varchar(55) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `garantia` (
+  `id_garantia` int NOT NULL AUTO_INCREMENT,
+  `status_garantia` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`id_garantia`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `grm` (
+  `id_grm` int NOT NULL AUTO_INCREMENT,
+  `numero_grm` varchar(10) DEFAULT NULL,
+  PRIMARY KEY (`id_grm`)
+) ENGINE=InnoDB AUTO_INCREMENT=50 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `usuario` (
+  `id_usuario` int NOT NULL AUTO_INCREMENT,
+  `nome_usuario` varchar(55) DEFAULT NULL,
+  `cpf_usuario` varchar(11) DEFAULT NULL,
+  `cargo` varchar(55) DEFAULT NULL,
+  `login` varchar(25) DEFAULT NULL,
+  `senha` varchar(25) DEFAULT NULL,
+  `confirm_senha` varchar(25) DEFAULT NULL,
+  PRIMARY KEY (`id_usuario`),
+  UNIQUE KEY `cpf_usuario` (`cpf_usuario`),
+  UNIQUE KEY `login` (`login`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+CREATE TABLE `operacao` (
+  `id_operacao` int NOT NULL AUTO_INCREMENT,
+  `fk_grm` int DEFAULT NULL,
+  `fk_prod` int DEFAULT NULL,
+  `serial_number` varchar(14) DEFAULT NULL,
+  `garantia` tinyint(1) DEFAULT NULL,
+  `state` enum('novo','reparado','atualização','garantia') DEFAULT NULL,
+  `fk_def` int DEFAULT NULL,
+  `componente` varchar (20),
+  `fk_usuario` int DEFAULT NULL,
+  `data_operacao` datetime DEFAULT NULL,
+  PRIMARY KEY (`id_operacao`),
+  KEY `fk_prod` (`fk_prod`),
+  KEY `fk_grm` (`fk_grm`),
+  KEY `fk_usuario` (`fk_usuario`),
+  KEY `fk_def` (`fk_def`),
+  CONSTRAINT `operacao_ibfk_1` FOREIGN KEY (`fk_prod`) REFERENCES `produto` (`id_produto`),
+  CONSTRAINT `operacao_ibfk_2` FOREIGN KEY (`fk_grm`) REFERENCES `grm` (`id_grm`),
+  CONSTRAINT `operacao_ibfk_3` FOREIGN KEY (`fk_usuario`) REFERENCES `usuario` (`id_usuario`),
+  CONSTRAINT `operacao_ibfk_4` FOREIGN KEY (`fk_def`) REFERENCES `defeito` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `grm_oper` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `fk_operacao` int DEFAULT NULL,
+  `fk_grm` int DEFAULT NULL,
+  `fk_prod` int DEFAULT NULL,
+  `qtd` int DEFAULT NULL,
+  `reparado` tinyint(1) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_operacao` (`fk_operacao`),
+  KEY `fk_prod` (`fk_prod`),
+  KEY `fk_grm` (`fk_grm`),
+  CONSTRAINT `grm_oper_ibfk_1` FOREIGN KEY (`fk_operacao`) REFERENCES `operacao` (`id_operacao`),
+  CONSTRAINT `grm_oper_ibfk_2` FOREIGN KEY (`fk_prod`) REFERENCES `produto` (`id_produto`),
+  CONSTRAINT `grm_oper_ibfk_3` FOREIGN KEY (`fk_grm`) REFERENCES `grm` (`id_grm`)
+) ENGINE=InnoDB AUTO_INCREMENT=43 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `oper_comp` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `fk_componente` int DEFAULT NULL,
+  `fk_operacao` int DEFAULT NULL,
+  `qtd` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_componente` (`fk_componente`),
+  KEY `fk_operacao` (`fk_operacao`),
+  CONSTRAINT `oper_comp_ibfk_1` FOREIGN KEY (`fk_componente`) REFERENCES `componente` (`id_componente`),
+  CONSTRAINT `oper_comp_ibfk_2` FOREIGN KEY (`fk_operacao`) REFERENCES `operacao` (`id_operacao`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+CREATE TABLE `status_` (
+  `id_status` int NOT NULL AUTO_INCREMENT,
+  `nome_status` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`id_status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+select * from grm;
+select * from produto;
+select * from usuario;
+select * from operacao;
+select grm.numero_grm, produto.nome_produto, grm_oper.qtd, grm_oper.reparado 
+from grm_oper 
+inner join produto on grm_oper.fk_prod = produto.id_produto 
+inner join grm on grm_oper.fk_grm = grm.id_grm 
+where numero_grm = '234455';
+select * from grm where numero_grm = '222222';
+
+set foreign_key_checks = 1; 
+
+truncate table grm;
+
+select * from grm;
+
+
